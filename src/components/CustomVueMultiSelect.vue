@@ -1,4 +1,3 @@
-
 <template>
 	<div
 		:id="id"
@@ -21,12 +20,7 @@
 				</span>
 			</div>
 			<div class="indicator-icon">
-				<img
-					
-					alt="bill-debt"
-					draggable="false"
-					width="23"
-				/>
+				<img alt="bill-debt" draggable="false" width="23" />
 			</div>
 		</div>
 		<transition name="fade">
@@ -44,7 +38,7 @@
 							:value="getOptionValue(item)"
 							:click="onChange.bind(this, item)"
 						>
-							<b-form-checkbox class="not-clickable">
+							<b-form-checkbox class="not-clickable" :checked="optionIsSelected(item)">
 								{{ getOptionValue(item) }}
 							</b-form-checkbox>
 						</slot>
@@ -64,7 +58,7 @@ export default {
 		BFormCheckbox,
 	},
 	model: {
-		prop: "selected",
+		prop: "values",
 		event: "input",
 	},
 	props: {
@@ -72,14 +66,14 @@ export default {
 			type: String,
 			required: false,
 		},
-		defaultSelected: {
-			type: Array,
-			required: false,
-			default: null,
-		},
 		options: {
 			type: Array,
 			required: true,
+		},
+		values: {
+			type: Array,
+			required: false,
+			default: () => [],
 		},
 		basedOn: {
 			type: String,
@@ -105,7 +99,7 @@ export default {
 	},
 	data() {
 		return {
-			selectedItems: this.defaultSelected || [],
+			selectedItems: this.getValues(this.values),
 			isOpen: false,
 		};
 	},
@@ -114,16 +108,22 @@ export default {
 			return !!this.$slots.option;
 		},
 	},
-	mounted() {
-		this.$emit("input", this.selectedItems);
-		
-	},
 	methods: {
 		getOptionValue(anOption) {
 			if (anOption === Object(anOption)) return anOption[this.basedOn];
 			return anOption;
 		},
-		onChange(value, event) {
+		getValues(rawValues = []) {
+			return rawValues.map((item) => item.value);
+		},
+		optionIsSelected(option) {
+			for (const item of this.selectedItems) {
+				if (this.getOptionValue(item) === this.getOptionValue(option)) return true;
+			}
+
+			return false;
+		},
+		onChange(value) {
 			const valueIndex = this.selectedItems.findIndex(
 				(item) => this.getOptionValue(value) === this.getOptionValue(item)
 			);
@@ -133,18 +133,18 @@ export default {
 				this.selectedItems = newItems;
 			} else this.selectedItems = [...this.selectedItems, value];
 
-			if (this.targetKey) {
-				this.$emit(
-					"input",
-					this.selectedItems.map((item) => item[this.targetKey])
-				);
-			} else {
-				this.$emit("input", this.selectedItems);
-			}
+			console.log(this.selectedItems);
 
-			const checkboxNode = event.target.querySelector("input[type='checkbox']");
-			checkboxNode.checked = !checkboxNode.checked;
-
+			this.$emit(
+				"input",
+				this.selectedItems.map((item) => {
+					return {
+						value: item,
+						targetValue: this.targetKey ? item[this.targetKey] : null,
+					};
+				})
+			);
+		
 			this.closeDropdown();
 		},
 		closeDropdown() {
@@ -159,7 +159,7 @@ export default {
 $border-radius: 10px;
 $black: #000;
 $cvs-box-shadow: 0 4px 15px 0 rgba($black, 0.3);
-$primary: #fff;
+$primary: rgb(171, 66, 200);
 .vue-select {
 	width: 100%;
 	min-width: 0;

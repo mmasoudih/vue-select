@@ -23,12 +23,7 @@
 				</span>
 			</div>
 			<div class="indicator-icon">
-				<img
-					
-					alt="bill-debt"
-					draggable="false"
-					width="23"
-				/>
+				<img alt="bill-debt" draggable="false" width="23" />
 			</div>
 		</div>
 		<transition name="fade">
@@ -104,7 +99,7 @@ export default {
 	},
 	data() {
 		return {
-			selected: this.$props.value || null,
+			selected: this.value.value || null,
 			isOpen: false,
 		};
 	},
@@ -124,11 +119,10 @@ export default {
 		onChange(value) {
 			this.selected = value;
 
-			if (this.targetKey) {
-				this.$emit("input", this.selected[this.targetKey]);
-			} else {
-				this.$emit("input", this.selected);
-			}
+			this.$emit("input", {
+				value: this.selected,
+				targetValue: this.targetKey ? this.selected[this.targetKey] : null,
+			});
 
 			this.isOpen = false;
 		},
@@ -151,7 +145,8 @@ export default {
 $border-radius: 10px;
 $black: #000;
 $cvs-box-shadow: 0 4px 15px 0 rgba($black, 0.3);
-$primary: #fff;.vue-select {
+$primary: #fff;
+.vue-select {
 	margin-top: 0.5rem;
 	width: 100%;
 	position: relative;
